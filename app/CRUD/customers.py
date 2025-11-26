@@ -25,7 +25,12 @@ def select_customers(cur):
                 """
             )
     customers = cur.fetchall()
-    print(customers if customers else "Aucun client récupéré")
+
+    if customers:
+        for customer in customers:
+            print(customer)
+    else:
+        print("Aucun produit récupéré")
 
 
 

@@ -354,10 +354,19 @@ INSERT INTO /* TODO: ex: order_items(order_id, product_id, quantity, unit_price)
 # 5️⃣ Partie 3 – Requêtes SQL de base
 
 1. Lister tous les clients triés par date de création de compte (plus anciens → plus récents).
+    SELECT * FROM customers ORDER BY date_of_account_creation ASC
+
 2. Lister tous les produits (nom + prix) triés par prix décroissant.
+    SELECT name, price FROM products ORDER BY price DESC
+
 3. Lister les commandes passées entre deux dates (par exemple entre le 1er et le 15 mars 2024).
+    SELECT * FROM orders WHERE order_date BETWEEN '2024-03-01 00:00:00' AND '2024-03-15 00:00:00'
+    
 4. Lister les produits dont le prix est strictement supérieur à 50 €.
+    SELECT * FROM products WHERE price > 50
+
 5. Lister tous les produits d’une catégorie donnée (par exemple “Électronique”).
+    SELECT * FROM products WHERE (SELECT name FROM categorie WHERE name = "Électronique")
 
 ---
 
