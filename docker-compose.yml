@@ -22,7 +22,7 @@ services:
     depends_on:
       - db
     environment:
-      PGADMIN_DEFAULT_EMAIL: admin@admin
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
       PGADMIN_USER: admin
       PGADMIN_DEFAULT_PASSWORD: mdp
     restart: always
@@ -37,19 +37,9 @@ services:
       context: ./app
       dockerfile: Dockerfile
     container_name: app_e_commerce
-    environment:
-      DB_HOST: db
-      DB_PORT: 5432
-      DB_NAME: user
-      DB_USER: user
-      DB_PASSWORD: password
     depends_on:
       - db
-    restart: always
-    ports:
-      - "5000:5000"
-    networks:
-      - network
+
 
 # Volumes
 volumes:
