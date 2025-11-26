@@ -12,6 +12,7 @@ services:
       - "5432:5432"
     volumes: 
       - volume_pgdata:/var/lib/postgresql
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
     networks:
       - network
   
@@ -26,6 +27,8 @@ services:
       PGADMIN_USER: admin
       PGADMIN_DEFAULT_PASSWORD: mdp
     restart: always
+    volumes:
+      - volume_pgadmin:/var/lib/pgadmin
     ports:
       - "8080:80"
     networks:
@@ -37,13 +40,17 @@ services:
       context: ./app
       dockerfile: Dockerfile
     container_name: app_e_commerce
+    restart: always
     depends_on:
       - db
+    networks:
+      - network
 
 
 # Volumes
 volumes:
   volume_pgdata:
+  volume_pgadmin:
 
 # Réseaux
 networks:
