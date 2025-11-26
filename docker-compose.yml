@@ -1,0 +1,60 @@
+services: 
+  # Service postgres
+  db:
+    image: postgres
+    container_name: postgres_db
+    environment: 
+      POSTGRES_DB: user
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+    restart: always
+    ports: 
+      - "5432:5432"
+    volumes: 
+      - volume_pgdata:/var/lib/postgresql
+    networks:
+      - network
+  
+  # Service pgadmin
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: pgadmin
+    depends_on:
+      - db
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin
+      PGADMIN_USER: admin
+      PGADMIN_DEFAULT_PASSWORD: mdp
+    restart: always
+    ports:
+      - "8080:80"
+    networks:
+      - network
+
+  # Service Python (app)
+  python_app:
+    build: 
+      context: ./app
+      dockerfile: Dockerfile
+    container_name: app_e_commerce
+    environment:
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_NAME: user
+      DB_USER: user
+      DB_PASSWORD: password
+    depends_on:
+      - db
+    restart: always
+    ports:
+      - "5000:5000"
+    networks:
+      - network
+
+# Volumes
+volumes:
+  volume_pgdata:
+
+# Réseaux
+networks:
+  network: 
