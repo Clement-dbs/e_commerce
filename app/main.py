@@ -1,33 +1,25 @@
 import psycopg
-from CRUD.init_db import DSN
-from CRUD.init_request import Request
-from CRUD.requests import *
-from write import WriteInFile
+import csv
+
+from requests import *
 
 if __name__ == "__main__":
-    
-    # Récupère le chiffre d'affaire
-    print("Récupère le chiffre d'affaire")
-    request = select_CA()
-    print(request)
-    #WriteInFile("fichier_analyses", request).write()
 
-    # Récupère le panier moyen
-    print("Récupère le panier moyen")
-    request = select_pannier_moyen()
-    print(request)
+    chiffre_affaire = str(select_CA())
+    panier_moyen = str(select_pannier_moyen())
+    article_plus_vendu = str(select_product_most_bought())
+    tp_client_depense = str(select_customer_most_bought())
+    chiffre_affaire_par_categorie = str(select_CA_by_categories())
 
-    # Récupère l'article le plus vendu
-    print("Récupère l'article le plus vendu")
-    request = select_product_most_bought()
-    print(request)
-
-    # Récupère le top des clients qui ont le plus dépensé
-    print("Récupère le top des clients qui ont le plus dépensé")
-    request = select_customer_most_bought()
-    print(request)
-
-    # Récupère le chiffre d’affaires par catégorie
-    print("Récupère le chiffre d’affaires par catégorie")
-    request = select_CA_by_categories()
-    print(request)
+    with open("analyses.txt","a",encoding='utf-8') as data_file:
+            data_file.write("=== Chiffre d'affaire === \n")
+            data_file.write(f"Le chiffre d’affaires total (hors commandes annulées) est de {chiffre_affaire} € \n \n")
+            data_file.write("=== Panier moyen === \n")
+            data_file.write(f"Le panier moyen (hors commandes annulées) est de {panier_moyen} par commande \n \n")
+            data_file.write("=== Article le plus vendu === \n")
+            data_file.write(f"L’article ayant généré le plus de ventes (en quantité totale) est : {article_plus_vendu} \n \n")
+            data_file.write("=== Top des clients qui ont le plus dépensé === \n")
+            data_file.write(f"Les trois clients ayant le plus dépensé (hors commandes annulées) sont : {tp_client_depense} \n \n")
+            data_file.write("=== Chiffre d’affaires par catégorie === \n")
+            data_file.write(f"Répartition du chiffre d’affaires (hors commandes annulées) par catégorie de produits : {chiffre_affaire_par_categorie} \n \n")
+ 
