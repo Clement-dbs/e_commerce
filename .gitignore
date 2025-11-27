@@ -1,2 +1,5 @@
-# .env
-# pycache/
+# Fichier d'environnement
+.env
+
+# Python
+__pycache__/

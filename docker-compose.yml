@@ -1,40 +1,36 @@
-services: 
-  # Service postgres
+services:
   db:
     image: postgres
     container_name: postgres_db
     environment: 
-      POSTGRES_DB: user
-      POSTGRES_USER: user
-      POSTGRES_PASSWORD: password
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     restart: always
     ports: 
-      - "5432:5432"
+      - "${POSTGRES_PORT}:5432"
     volumes: 
       - volume_pgdata:/var/lib/postgresql
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql
     networks:
       - network
   
-  # Service pgadmin
   pgadmin:
     image: dpage/pgadmin4
     container_name: pgadmin
     depends_on:
       - db
     environment:
-      PGADMIN_DEFAULT_EMAIL: admin@admin.com
-      PGADMIN_USER: admin
-      PGADMIN_DEFAULT_PASSWORD: mdp
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
     restart: always
     volumes:
       - volume_pgadmin:/var/lib/pgadmin
     ports:
-      - "8080:80"
+      - "${PGADMIN_PORT}:80"
     networks:
       - network
 
-  # Service Python (app)
   python_app:
     build: 
       context: ./app
@@ -43,15 +39,16 @@ services:
     restart: always
     depends_on:
       - db
+    environment:
+      APP_ENV: ${APP_ENV}
+      APP_SECRET_KEY: ${APP_SECRET_KEY}
+      API_PORT: ${API_PORT}
     networks:
       - network
 
-
-# Volumes
 volumes:
   volume_pgdata:
   volume_pgadmin:
 
-# Réseaux
 networks:
-  network: 
+  network:
