@@ -1,20 +1,29 @@
-CREATE TABLE IF NOT EXISTS categories (
+DROP TABLE IF EXISTS categories CASCADE;
+DROP TABLE IF EXISTS products CASCADE;
+DROP TABLE IF EXISTS customers CASCADE;
+DROP TABLE IF EXISTS orders CASCADE;
+DROP TABLE IF EXISTS order_items CASCADE;
+DROP TYPE IF EXISTS order_status CASCADE;
+
+CREATE TYPE order_status AS ENUM ('PENDING', 'PAID', 'SHIPPED', 'CANCELLED');
+
+CREATE TABLE categories (
     id_category INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     name VARCHAR(20) NOT NULL UNIQUE,
     description TEXT
 );
 
-CREATE TABLE IF NOT EXISTS products (
+CREATE TABLE products (
     id_product INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     name VARCHAR(50) NOT NULL,
     price DECIMAL(10, 2) NOT NULL,
-    stock_disponibility INT NOT NULL,
+    stock_availability INT NOT NULL,
     id_category INT,
     FOREIGN KEY (id_category) REFERENCES categories(id_category) ON DELETE SET NULL
 );
 
 
-CREATE TABLE IF NOT EXISTS customers (
+CREATE TABLE customers (
     id_customer INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     first_name VARCHAR(30) NOT NULL,
     last_name VARCHAR(30) NOT NULL,
@@ -23,15 +32,8 @@ CREATE TABLE IF NOT EXISTS customers (
 );
 
 
-DO $$
-BEGIN
-   IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'order_status') THEN
-      CREATE TYPE order_status AS ENUM ('PENDING', 'PAID', 'SHIPPED', 'CANCELLED');
-   END IF;
-END
-$$;
 
-CREATE TABLE IF NOT EXISTS orders (
+CREATE TABLE orders (
     id_order INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     id_customer INT,
     order_date TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -39,14 +41,14 @@ CREATE TABLE IF NOT EXISTS orders (
     FOREIGN KEY (id_customer) REFERENCES customers(id_customer) ON DELETE CASCADE
 );
 
-CREATE TABLE IF NOT EXISTS order_items(
+CREATE TABLE order_items(
     id_order_items INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     id_order INT NOT NULL,
     id_product INT NOT NULL,
     quantity INT NOT NULL,
-    unit_price FLOAT NOT NULL,
-    FOREIGN KEY (id_product) REFERENCES products(id_product) ON DELETE SET NULL,
-    FOREIGN KEY (id_order) REFERENCES orders(id_order) ON DELETE SET NULL
+    unit_price DECIMAL(10,2) NOT NULL,
+    FOREIGN KEY (id_product) REFERENCES products(id_product) ON DELETE CASCADE,
+    FOREIGN KEY (id_order) REFERENCES orders(id_order) ON DELETE CASCADE
 );
 
 INSERT INTO categories(name, description)  VALUES
@@ -56,7 +58,7 @@ INSERT INTO categories(name, description)  VALUES
   ('Beauté & Santé',     'Produits de beauté, hygiène, bien-être'),
   ('Jeux & Jouets',      'Jouets pour enfants et adultes');
 
-INSERT INTO products(name, price, stock_disponibility, id_category) VALUES
+INSERT INTO products(name, price, stock_availability, id_category) VALUES
   ('Casque Bluetooth X1000',        79.99,  4,  (select id_category from categories where name = 'Électronique')),
   ('Souris Gamer Pro RGB',          49.90, 120,  (select id_category from categories where name ='Électronique')),
   ('Bouilloire Inox 1.7L',          29.99,  80,  (select id_category from categories where name ='Maison & Cuisine')),
