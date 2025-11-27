@@ -366,14 +366,25 @@ INSERT INTO /* TODO: ex: order_items(order_id, product_id, quantity, unit_price)
     SELECT * FROM products WHERE price > 50
 
 5. Lister tous les produits d’une catégorie donnée (par exemple “Électronique”).
-    SELECT * FROM products WHERE (SELECT name FROM categorie WHERE name = "Électronique")
+    SELECT * FROM products WHERE id_product = (select id_category from categories where name = 'Électronique')
 
 ---
 
 # 6️⃣ Partie 4 – Jointures simples
 
 1. Lister tous les produits avec le nom de leur catégorie.
+  SELECT p.*, c.name AS category_name
+  FROM products p
+  JOIN categories c
+  ON p.id_product = c.id_category;
+
+
 2. Lister toutes les commandes avec le nom complet du client (prénom + nom).
+  SELECT o.*, c.first_name,c.last_name 
+  FROM orders o
+  JOIN customers c
+      ON o.id_order = c.id_customer;
+
 3. Lister toutes les lignes de commande avec :
 
    * le nom du client,
@@ -381,6 +392,17 @@ INSERT INTO /* TODO: ex: order_items(order_id, product_id, quantity, unit_price)
    * la quantité,
    * le prix unitaire facturé.
 4. Lister toutes les commandes dont le statut est `PAID` ou `SHIPPED`.
+
+SELECT c.last_name, p.name, o_i.quantity, o_i.unit_price
+FROM order_items o_i
+JOIN orders o 
+    ON o_i.id_order_items = o.id_order
+JOIN customers c 
+    ON o.id_customer = c.id_customer
+JOIN products p 
+    ON o_i.id_product = p.id_product
+WHERE o.status IN ('PAID', 'SHIPPED');
+
 
 ---
 
@@ -395,33 +417,125 @@ INSERT INTO /* TODO: ex: order_items(order_id, product_id, quantity, unit_price)
    * prix unitaire facturé,
    * montant total de la ligne (quantité × prix unitaire).
 
+  SELECT o.order_date, c.first_name, p.name, o_i.quantity,o_i.unit_price, (o_i.quantity*o_i.unit_price) as montant_total
+  FROM order_items o_i
+  JOIN orders o 
+      ON o_i.id_order_items = o.id_order
+  JOIN customers c 
+      ON o.id_customer = c.id_customer
+  JOIN products p 
+      ON o_i.id_product = p.id_product
+
+
 2. Calculer le **montant total de chaque commande** et afficher uniquement :
 
    * l’ID de la commande,
    * le nom du client,
    * le montant total de la commande.
 
+   SELECT o.id_order, c.first_name, c.last_name, (o_i.quantity*o_i.unit_price) as montant_total
+  FROM order_items o_i
+  JOIN orders o 
+      ON o_i.id_order_items = o.id_order
+  JOIN customers c 
+      ON o.id_customer = c.id_customer
+  JOIN products p 
+      ON o_i.id_product = p.id_product
+
+
+
 3. Afficher les commandes dont le montant total **dépasse 100 €**.
 
+ SELECT o.order_date, c.first_name, p.name, o_i.quantity,o_i.unit_price, (o_i.quantity*o_i.unit_price) as montant_total
+ FROM order_items o_i
+ JOIN orders o 
+     ON o_i.id_order_items = o.id_order
+ JOIN customers c 
+     ON o.id_customer = c.id_customer
+ JOIN products p 
+     ON o_i.id_product = p.id_product
+WHERE o_i.quantity*o_i.unit_price > 100
+
 4. Lister les catégories avec leur **chiffre d’affaires total** (somme du montant des lignes sur tous les produits de cette catégorie).
+
+SELECT 
+    c.name, SUM(o_i.quantity * o_i.unit_price) as chiffre_affaires_total
+FROM categories c
+JOIN products p 
+    ON p.id_category = c.id_category
+JOIN order_items o_i  
+    ON o_i.id_product = p.id_product
+JOIN orders o
+    ON o_i.id_order = o.id_order
+GROUP BY c.id_category, c.name
+
 
 ---
 
 # 8️⃣ Partie 6 – Sous-requêtes
 
 1. Lister les produits qui ont été vendus **au moins une fois**.
-2. Lister les produits qui **n’ont jamais été vendus**.
+
+SELECT p.*
+FROM products p
+WHERE p.id_product = (SELECT id_order FROM orders WHERE orders.id_order = p.id_product)
+
+🔴 2. Lister les produits qui **n’ont jamais été vendus**.
 3. Trouver le client qui a **dépensé le plus** (TOP 1 en chiffre d’affaires cumulé).
+
+SELECT 
+    c.id_customer,
+    c.first_name,
+    c.last_name,
+    (
+        SELECT SUM(o_i.quantity * o_i.unit_price)
+        FROM orders o
+        JOIN order_items o_i 
+            ON o.id_order = o_i.id_order
+        WHERE o.id_customer = c.id_customer
+    ) AS total_depense
+FROM customers c
+ORDER BY total_depense DESC
+
 4. Afficher les **3 produits les plus vendus** en termes de quantité totale.
-5. Lister les commandes dont le montant total est **strictement supérieur à la moyenne** de toutes les commandes.
+
+SELECT p.*
+FROM products p
+JOIN order_items o_i  
+    ON o_i.id_product = p.id_product
+JOIN orders o
+    ON o_i.id_order = o.id_order
+ORDER BY quantity DESC
+LIMIT 3
+
+
+ 🔴 5. Lister les commandes dont le montant total est **strictement supérieur à la moyenne** de toutes les commandes.
+
+
 
 ---
 
 # 9️⃣ Partie 7 – Statistiques & agrégats
 
 1. Calculer le **chiffre d’affaires total** (toutes commandes confondues, hors commandes annulées si souhaité).
+
+SELECT SUM(o_i.quantity * o_i.unit_price) as chiffre_affaire
+FROM order_items o_i
+JOIN orders o
+	ON o.id_order = o_i.id_order_items
+WHERE o.status IN ('PAID', 'SHIPPED');
+
 2. Calculer le **panier moyen** (montant moyen par commande).
+
+SELECT AVG(o_i.quantity * o_i.unit_price) as pannier_moyen
+FROM order_items o_i
+JOIN orders o
+	ON o.id_order = o_i.id_order_items
+WHERE o.status IN ('PAID', 'SHIPPED');
+
 3. Calculer la **quantité totale vendue par catégorie**.
+
+
 4. Calculer le **chiffre d’affaires par mois** (au moins sur les données fournies).
 5. Formater les montants pour n’afficher que **deux décimales**.
 

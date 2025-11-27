@@ -2,7 +2,7 @@ import psycopg
 from init_db import DSN
 from init_request import Request
 
-# SELECT un commande par son Id
+# SELECT une commande par son Id
 def select_order_by_id(id_order: int):
     def action(cur):
         cur.execute(
