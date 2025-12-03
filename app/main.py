@@ -11,7 +11,7 @@ if __name__ == "__main__":
     tp_client_depense = str(select_customer_most_bought())
     chiffre_affaire_par_categorie = str(select_CA_by_categories())
 
-    with open("analyses.txt","a",encoding='utf-8') as data_file:
+    with open("analyses.txt","w",encoding='utf-8') as data_file:
             data_file.write("=== Chiffre d'affaire === \n")
             data_file.write(f"Le chiffre d’affaires total (hors commandes annulées) est de {chiffre_affaire} € \n \n")
             data_file.write("=== Panier moyen === \n")

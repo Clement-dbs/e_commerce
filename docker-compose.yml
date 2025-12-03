@@ -26,6 +26,7 @@ services:
     restart: always
     volumes:
       - volume_pgadmin:/var/lib/pgadmin
+      - ./storage:/var/lib/pgadmin/storage
     ports:
       - "${PGADMIN_PORT}:80"
     networks:
